@@ -1,0 +1,3 @@
+# smutil
+
+utilities for snakemake
