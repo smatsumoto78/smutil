@@ -7,7 +7,6 @@ snakemake utils
 import os
 
 import configargparse
-from snakemake import checkpoints
 from snakemake.io import expand, glob_wildcards
 
 
@@ -23,17 +22,17 @@ def load_env(env_file: str = '.env'):
     os.environ.update(envs)
 
 
-def aggregate_input_func(base_checkpoint, base_rule, target_rule=None, output_key=0):
+def aggregate_input_func(base_checkpoint_obj, base_rule, target_rule=None, output_key=0):
     """
     return input function for aggregating inputs from checkpoint
-    :param base_checkpoint: checkpoint name
+    :param base_checkpoint_obj: checkpoint object. "checkpoints.some_checkpoint"
     :param base_rule: aggregation filenames at checkpoint
     :param target_rule: aggregation filenames at previous rule. If previous rule is base_checkpoint, set None (default: None)
     :param output_key: key of checkpoint's output for aggregation directory. (default: 0)
     :return: function for input section
     """
     def aggregate_input(wildcards):
-        ops = vars(checkpoints).get(base_checkpoint).get(**wildcards).output
+        ops = base_checkpoint_obj.get(**wildcards).output
         checkpoint_output = _output_accessor(ops, output_key)
         expand_base_rule = os.path.join(checkpoint_output, base_rule)
         expand_target_rule = target_rule or expand_base_rule
