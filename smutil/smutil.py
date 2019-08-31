@@ -5,9 +5,10 @@ snakemake utils
 """
 
 import os
+from typing import Union, Iterable
 
 import configargparse
-from snakemake.io import expand, glob_wildcards
+from snakemake.io import expand, glob_wildcards, touch
 
 
 def load_env(env_file: str = '.env'):
@@ -20,6 +21,57 @@ def load_env(env_file: str = '.env'):
         envs = env_conf.parse(conf_file)
     envs.update(os.environ)  # don't overwrite original environment
     os.environ.update(envs)
+
+
+def touch_o(filename: Union[str, Iterable[str]]):
+    """
+    touch files within '.snakemake/touchfiles' folder
+
+    usage:
+    import smutil as util
+    params = ['A', 'B', 'C']
+
+    rule all:
+        input: util.touch_i(expand('s_1_{p}', p=params)), util.touch_i('s_2')
+
+    rule s_1:
+        output: util.touch_o('s_1_{p}')
+        shell: "echo s_1 {wildcards.p}"
+
+    rule s_2:
+        output: util.touch_o('s_2')
+        shell: "echo s_2"
+
+    """
+    return touch(touch_i(filename))
+
+
+def touch_i(filename: Union[str, Iterable[str]]):
+    """
+    return touch_in filename (to use in input: parameter)
+
+    usage:
+    import smutil as util
+    params = ['A', 'B', 'C']
+
+    rule all:
+        input: util.touch_i(expand('s_1_{p}', p=params)), util.touch_i('s_2')
+
+    rule s_1:
+        output: util.touch_o('s_1_{p}')
+        shell: "echo s_1 {wildcards.p}"
+
+    rule s_2:
+        output: util.touch_o('s_2')
+        shell: "echo s_2"
+
+    """
+    if isinstance(filename, str):
+        return os.path.join('.snakemake', 'touchfiles', filename)
+    elif isinstance(filename, Iterable):
+        return [touch_i(f) for f in filename]
+    else:
+        raise TypeError()
 
 
 def aggregate_input_func(base_checkpoint_obj, base_rule, target_rule=None, output_key=0):
