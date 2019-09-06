@@ -3,22 +3,30 @@
 """
 snakemake utils
 """
-
+import io
 import os
+import subprocess
 from typing import Union, Iterable
 
 import configargparse
 from snakemake.io import expand, glob_wildcards, touch
 
 
-def load_env(env_file: str = '.env'):
+def load_env(env_file: str = '.env', sh_exp: bool = True):
     """
     load .env file, and set as environment variables
     :param env_file: env filename (default ".env")
+    :param sh_exp: apply sh expansion (default True)
     """
     env_conf = configargparse.DefaultConfigFileParser()
-    with open(env_file) as conf_file:
-        envs = env_conf.parse(conf_file)
+    if sh_exp:
+        sh_result = subprocess.run(["sh", "-x", env_file], capture_output=True, encoding='ascii')
+        env_str = sh_result.stderr.replace("+ ", "")
+        sio = io.StringIO(env_str)
+        envs = env_conf.parse(sio)
+    else:
+        with open(env_file) as conf_file:
+            envs = env_conf.parse(conf_file)
     envs.update(os.environ)  # don't overwrite original environment
     os.environ.update(envs)
 
