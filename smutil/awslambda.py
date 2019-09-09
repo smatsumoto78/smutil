@@ -9,6 +9,8 @@ import logging
 import os
 import shlex
 import sys
+from collections.abc import Callable, Iterable
+from typing import Optional
 
 import boto3
 
@@ -17,7 +19,7 @@ s3 = boto3.client('s3')
 is_lambda = False
 
 
-def add_lambda_handler(func):
+def add_lambda_handler(func: Callable[[Optional[Iterable]], None]):
     # lambda 対応 - /tmp に行って、event["ARGS"] を引数として使われるようにする
     def lambda_handler(event, context):
         os.chdir('/tmp')
