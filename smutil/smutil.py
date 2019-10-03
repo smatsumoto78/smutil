@@ -5,6 +5,7 @@ snakemake utils
 """
 import io
 import os
+import shlex
 import subprocess
 from typing import Union, Iterable
 
@@ -22,7 +23,7 @@ def load_env(env_file: str = '.env', sh_exp: bool = True):
     if sh_exp:
         sh_result = subprocess.run(["sh", "-x", env_file], capture_output=True, encoding='ascii')
         env_str = sh_result.stderr.replace("+ ", "")
-        sio = io.StringIO(env_str)
+        sio = io.StringIO("\n".join(shlex.split(env_str)))
         envs = env_conf.parse(sio)
     else:
         with open(env_file) as conf_file:
