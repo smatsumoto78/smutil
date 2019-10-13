@@ -37,7 +37,7 @@ class patched_shell(shell):
         super().__new__(cls, cmd, *args, **kwargs)
 
 
-def deco2(prm=None):
+def rule_lambda(prm=None):
     def decorate(ruleinfo):
         original_func = ruleinfo.func
         @patch('snakemake.workflow.shell', new=patched_shell)
@@ -46,13 +46,17 @@ def deco2(prm=None):
 
         ruleinfo.func = new_func
 
+        # Add 'lambda_invoker.sh' to call AWS lambda function
         ruleinfo.shellcmd = './lambda_invoker.sh ' + ruleinfo.shellcmd
         # ruleinfo.docstring += prm
 
-        # Apply S3.remote() for all non-keywords of input and output.
-        ruleinfo.input = (tuple(map(S3.remote, ruleinfo.input[0])),
+        # Apply S3.remote(*. stay_on_remote=True) for all non-keywords of input and output.
+        def s3_remote_(*args, **kwargs):
+            return S3.remote(*args, stay_on_remote=True, **kwargs)
+
+        ruleinfo.input = (tuple(map(s3_remote_, ruleinfo.input[0])),
                           ruleinfo.input[1])
-        ruleinfo.output = (tuple(map(S3.remote, ruleinfo.output[0])),
+        ruleinfo.output = (tuple(map(s3_remote_, ruleinfo.output[0])),
                            ruleinfo.output[1])
 
         return ruleinfo
