@@ -9,8 +9,8 @@ import logging
 import os
 import shlex
 import sys
-from collections.abc import Callable, Iterable
-from typing import Optional
+from collections.abc import Iterable
+from typing import Callable, Optional
 
 import boto3
 
