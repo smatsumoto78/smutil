@@ -20,6 +20,7 @@ is_lambda = False
 
 
 def add_lambda_handler(func: Callable[[Optional[Iterable]], None]):
+    """lambda_handler() をモジュールに追加する。main 関数への decorator として使われることを想定"""
     # lambda 対応 - /tmp に行って、event["ARGS"] を引数として使われるようにする
     def lambda_handler(event, context):
         os.chdir('/tmp')
