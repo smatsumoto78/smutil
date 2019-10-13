@@ -5,23 +5,23 @@ Snakemake の lambda 実行に切り替える Rule デコレータ
 """
 
 import inspect
-from unittest.mock import patch, MagicMock
+import logging
+from unittest.mock import patch
 
-from snakemake.workflow import RuleInfo
-import snakemake
 import snakemake.shell as shell
-
 from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
 S3 = S3RemoteProvider()
+
+logger = logging.getLogger(__name__)
 
 
 class patched_shell(shell):
     """shell() の置き換え。結局、rule の中にある shell(...) が呼び出されるのでパッチが必要"""
     def __new__(cls, cmd, *args, **kwargs):
-        print("shell is replaced")
-        print(args, kwargs)
-        print(type(cls))
-        print(cls)
+        logger.debug("shell is replaced")
+        logger.debug("  cmd: " + str(cmd))
+        logger.debug("  args: " + str(args))
+        logger.debug("  kwargs: " + str(kwargs))
 
         # 引数で渡ってくる cmd をデコレーション
         cmd = './lambda_invoker.sh  ' + cmd
