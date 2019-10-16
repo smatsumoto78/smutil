@@ -21,7 +21,7 @@ def load_env(env_file: str = '.env', sh_exp: bool = True):
     """
     env_conf = configargparse.DefaultConfigFileParser()
     if sh_exp:
-        sh_result = subprocess.run(["sh", "-x", env_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
+        sh_result = subprocess.run(["bash", "-x", env_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
         env_str = sh_result.stderr.replace("+ ", "")
         sio = io.StringIO("\n".join(shlex.split(env_str)))
         envs = env_conf.parse(sio)
